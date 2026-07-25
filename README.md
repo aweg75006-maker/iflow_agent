@@ -14,7 +14,15 @@
 
 ---
 
-<img src="https://raw.githubusercontent.com/PR-ODRIVE/PR-ODRIVE/main/assets/iflow-agent-banner.png" alt="IFlow Agent Banner" width="100%">
+```
+  ___  _____ ____  _     ___    _    ____    ___  _   _ ____
+ |_ _|/ ____|  _ \| |   / _ \  / \  |  _ \  / _ \| \ | / ___|
+  | || |  _| |_) | |  | | | |/ _ \ | | | || | | |  \| \___ \
+  | || | | |  __/| |__| |_| / ___ \| |_| || |_| | |\  |___) |
+ |___|_| |_|    |_____\___/_/   \_\____/  \___/|_| \_|____/
+```
+
+**🤖 Multi-Agent · 🎥 Multi-Modal · 📊 Built-in Evaluation**
 
 </div>
 
@@ -73,39 +81,48 @@
 
 ```mermaid
 graph TB
-    User[👤 用户任务] --> GA[🎯 GeneralAgent]
-    GA --> MA[🧠 MainAgent<br>任务规划与汇总]
+    User[用户任务] --> GA[GeneralAgent]
+    GA --> MA[MainAgent]
     
-    MA --> D1[📤 DelegateTask]
-    MA --> D2[📤 DelegateTask]
-    MA --> D3[📤 DelegateTask]
+    MA --> D1[DelegateTask]
+    MA --> D2[DelegateTask]
+    MA --> D3[DelegateTask]
     
-    D1 --> E1[🔧 Environment Clone]
-    D2 --> E2[🔧 Environment Clone]
-    D3 --> E3[🔧 Environment Clone]
+    D1 --> E1[Environment Clone]
+    D2 --> E2[Environment Clone]
+    D3 --> E3[Environment Clone]
     
-    E1 --> S1[⚡ SubAgent 1]
-    E2 --> S2[⚡ SubAgent 2]
-    E3 --> S3[⚡ SubAgent 3]
+    E1 --> S1[SubAgent 1]
+    E2 --> S2[SubAgent 2]
+    E3 --> S3[SubAgent 3]
     
-    S1 --> T1[🔍 Search]
-    S2 --> T2[🖼️ Image]
-    S3 --> T3[🎬 Video]
+    S1 --> T1[Search]
+    S2 --> T2[Image]
+    S3 --> T3[Video]
     
-    T1 --> R1[📊 Result]
-    T2 --> R2[📊 Result]
-    T3 --> R3[📊 Result]
+    T1 --> R1[Result]
+    T2 --> R2[Result]
+    T3 --> R3[Result]
     
     R1 --> MA
     R2 --> MA
     R3 --> MA
     
-    MA --> Answer[✅ 最终答案]
+    MA --> Answer[最终答案]
     
-    style User fill:#e1f5fe
-    style GA fill:#f3e5f5
-    style MA fill:#fff3e0
-    style Answer fill:#e8f5e8
+    style User fill:#e1f5fe,stroke:#90caf9
+    style GA fill:#f3e5f5,stroke:#ce93d8
+    style MA fill:#fff3e0,stroke:#ffcc80
+    style Answer fill:#e8f5e8,stroke:#a5d6a7
+    style D1 fill:#fce4ec,stroke:#ef9a9a
+    style D2 fill:#fce4ec,stroke:#ef9a9a
+    style D3 fill:#fce4ec,stroke:#ef9a9a
+    style S1 fill:#e8eaf6,stroke:#9fa8da
+    style S2 fill:#e8eaf6,stroke:#9fa8da
+    style S3 fill:#e8eaf6,stroke:#9fa8da
+    style T1 fill:#fff8e1,stroke:#ffe082
+    style T2 fill:#fff8e1,stroke:#ffe082
+    style T3 fill:#fff8e1,stroke:#ffe082
 ```
 
 </div>
