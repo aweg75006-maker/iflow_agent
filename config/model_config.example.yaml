@@ -1,0 +1,33 @@
+# Copy to model_config.yaml and enter local plaintext keys.
+models:
+  mimo:
+    model: "mimo-v2.5"
+    api_type: "openai"
+    base_url: "https://api.xiaomimimo.com/v1"
+    api_key: "replace-with-your-mimo-key"
+    temperature: 0.7
+    top_p: 0.95
+
+  mimo-pro:
+    model: "mimo-v2.5-pro"
+    api_type: "openai"
+    base_url: "https://api.xiaomimimo.com/v1"
+    api_key: "replace-with-your-mimo-key"
+    temperature: 0.7
+    top_p: 0.95
+
+  mimo-asr:
+    model: "mimo-v2.5-asr"
+    api_type: "openai"
+    base_url: "https://api.xiaomimimo.com/v1"
+    api_key: "replace-with-your-mimo-key"
+
+  vision:
+    model: "mimo-v2.5"
+    api_type: "openai"
+    base_url: "https://api.xiaomimimo.com/v1"
+    api_key: "replace-with-your-mimo-key"
+
+tools:
+  tavily:
+    api_key: "replace-with-your-tavily-key"

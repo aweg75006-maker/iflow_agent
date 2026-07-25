@@ -1,0 +1,4 @@
+{"id":"text-exact-001","category":"text","instruction":"计算 17 + 25，只返回数字。","expected":"42","scorer":"exact","allowed_tools":[],"tags":["smoke","deterministic"]}
+{"id":"text-numeric-001","category":"text","instruction":"圆周率保留两位小数是多少？只返回数字。","expected":3.14,"scorers":[{"type":"numeric","tolerance":0.01}],"allowed_tools":[],"tags":["smoke","deterministic"]}
+{"id":"web-tool-001","category":"web","instruction":"搜索 IFlow Agent 测试关键词并在答案中包含 IFLOW_EVAL_OK。","expected":"IFLOW_EVAL_OK","scorers":[{"type":"contains","weight":0.8},{"type":"tool_usage","weight":0.2,"required_tools":["TavilySearchAction"]}],"allowed_tools":["TavilySearchAction"],"pass_threshold":0.8,"tags":["example","tool-routing"]}
+{"id":"json-001","category":"structured","instruction":"只输出 JSON：name 为 iflow，version 为 2。","expected":{"name":"iflow","version":2},"scorer":{"type":"json","mode":"subset"},"allowed_tools":[],"tags":["smoke","structured"]}
