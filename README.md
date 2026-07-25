@@ -71,7 +71,40 @@
 - **🔒 环境隔离** - 每个 SubAgent 独立 Environment，避免状态污染
 - **🎯 智能路由** - 根据任务类型自动选择最优模型（文本/视觉/ASR）
 - **📈 评测系统** - 7 种评分器，支持答案质量、工具路由、成本、延迟多维评估
+- **🧠 RL 扩展** - 提供隔离的 GRPO 奖励回调与 verl 启动模板，不侵入默认运行时
 - **🔌 即插即用** - 兼容 OpenAI 协议，支持 MiMo、GPT-4、Claude 等模型
+
+---
+
+## 🔄 完整工作流
+
+IFlow Agent 按照“执行、评测、改进、再评测”的闭环工作，而不是运行完 Agent 就直接开始训练：
+
+```mermaid
+flowchart LR
+    A["通用任务"] --> B["GeneralAgent 执行"]
+    B --> C["答案与完整轨迹"]
+    C --> D["固定套件评测"]
+    D --> E{"失败归因"}
+    E -->|"工具、API、框架问题"| F["工程修复"]
+    F --> D
+    E -->|"MainAgent 策略问题"| G["审核并整理训练数据"]
+    G --> H["可选 GRPO 训练"]
+    H --> I["部署候选模型"]
+    I --> D
+    D -->|"达到质量门槛"| J["用于通用任务"]
+```
+
+| 阶段 | 负责模块 | 主要产物 |
+|---|---|---|
+| 通用任务执行 | `GeneralAgent`、`MainAgent`、`Runner` | 答案、Trace、Token、成本、延迟 |
+| 统一评测 | `EvaluationRunner`、`ScorerRegistry` | JSON/JSONL/CSV 报告与失败分类 |
+| 策略改进 | `extensions/reinforcement_learning/grpo` | 可选的策略模型检查点 |
+| 回归准入 | 同一套冻结评测用例 | 训练前后可比较的质量与效率指标 |
+
+只有持续性的任务拆解、工具选择或完成时机问题才适合进入 RL。工具实现错误、API 故障和能力缺失应先通过工程方式解决。训练集、调参集和最终冻结评测集必须隔离，训练后的模型也必须回到同一评测链路做对照，不能直接替换当前 MainAgent。
+
+完整的数据边界、判断标准和各阶段命令见 [端到端工作流](docs/workflow.md)。
 
 ---
 
@@ -367,6 +400,44 @@ cat results/smoke/summary.json | jq .
 
 ---
 
+## 🧠 GRPO 扩展实现
+
+`extensions/reinforcement_learning/` 对应上述闭环中的“策略改进”阶段，用于训练能够输出 IFlow `MainAgent` 决策协议的开源模型。该扩展不会被 `GeneralAgent` 自动导入，不会在安装或测试时启动训练，也不会把 PyTorch、Ray、vLLM、verl 等训练依赖加入核心运行环境。
+
+```mermaid
+flowchart LR
+    A[通用任务样本] --> B[MainAgent 决策输出]
+    B --> C[格式与动作校验]
+    B --> D[LLM Judge]
+    C --> E[四维加权奖励]
+    D --> E
+    E --> F[verl GRPO]
+    F --> G[兼容 IFlow 协议的模型]
+```
+
+奖励维度包括：
+
+| 维度 | 权重 | 计算方式 |
+|---|---:|---|
+| JSON 格式正确性 | 10% | 本地确定性校验 |
+| `delegate_task/complete` 动作有效性 | 10% | 本地确定性校验 |
+| 工具和子任务合理性 | 20% | OpenAI 兼容 Judge |
+| 决策质量 | 60% | OpenAI 兼容 Judge |
+
+Judge 默认复用 `config/model_config.yaml` 中的 `mimo-pro` 配置，也可以通过 `IFLOW_RL_JUDGE_*` 变量覆盖。扩展接受任意符合 verl 数据契约的 Parquet 数据，不绑定具体数据集、基础模型或参考轨迹。
+
+```bash
+VERL_DIR=/path/to/verl \
+BASE_MODEL_PATH=/path/to/base-model \
+TRAIN_FILE=/path/to/train.parquet \
+VAL_FILE=/path/to/validation.parquet \
+bash extensions/reinforcement_learning/grpo/train_grpo.sh
+```
+
+这里提供的是扩展接口和启动模板，项目当前不附带训练数据、模型权重或训练结果，也没有把未经实际训练验证的效果写成项目指标。完整字段约定和可配置项见 [强化学习扩展说明](extensions/reinforcement_learning/README.md)。
+
+---
+
 ## 🔧 高级用法
 
 ### 自定义工具
@@ -486,8 +557,17 @@ iflow_agent2/
 │   ├── loaders.py             # 用例加载
 │   ├── models.py              # 数据模型
 │   └── cli.py                 # 命令行接口
+├── 📁 extensions/              # 可选扩展，不侵入核心运行时
+│   └── 📁 reinforcement_learning/
+│       ├── README.md           # RL 数据契约与使用边界
+│       └── 📁 grpo/
+│           ├── reward.py       # verl 自定义奖励回调
+│           ├── train_grpo.sh   # 显式训练启动模板
+│           └── 📁 config/      # 可选训练器配置
 ├── 📁 config/                  # 配置文件
 │   └── model_config.example.yaml
+├── 📁 docs/
+│   └── workflow.md             # 执行、评测、RL 与回归闭环
 ├── 📁 tests/                   # 测试用例
 ├── 📄 general_agent.py         # 通用 Agent 入口
 ├── 📄 requirements.txt         # 依赖列表

@@ -4,3 +4,4 @@ config/model_config.yaml
 __pycache__/
 .pytest_cache/
 evaluation/results/
+extensions/reinforcement_learning/grpo/output/
